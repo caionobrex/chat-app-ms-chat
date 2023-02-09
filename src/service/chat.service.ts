@@ -78,6 +78,10 @@ export class ChatService {
       where: { id: data.chatId },
       include: { participants: true },
     });
+    if (
+      !chat.participants.find((participant) => participant.id === data.senderId)
+    )
+      throw new UnauthorizedException();
     const receiver = chat.participants.find(
       (participant) => participant.id !== data.senderId,
     );
