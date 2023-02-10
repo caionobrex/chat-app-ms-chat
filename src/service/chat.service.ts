@@ -97,7 +97,7 @@ export class ChatService {
       where: { id: chat.id },
       data: { updatedAt: new Date(), messagesCount: { increment: 1 } },
     });
-    // this.pusher.trigger(data.chatId, 'message-created', message);
+    this.pusher.trigger(data.chatId, 'message-created', message);
     return message;
   }
 
@@ -112,7 +112,7 @@ export class ChatService {
       where: { id: message.chatId },
       data: { updatedAt: new Date(), messagesCount: { decrement: 1 } },
     });
-    // this.pusher.trigger(message.chat.id, 'message-deleted', message);
+    this.pusher.trigger(message.chat.id, 'message-deleted', message);
     return message;
   }
 
