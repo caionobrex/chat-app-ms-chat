@@ -1,6 +1,7 @@
 -- CreateTable
 CREATE TABLE "Chat" (
     "id" TEXT NOT NULL,
+    "messagesCount" INTEGER NOT NULL DEFAULT 0,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
@@ -10,7 +11,12 @@ CREATE TABLE "Chat" (
 -- CreateTable
 CREATE TABLE "Message" (
     "id" TEXT NOT NULL,
+    "body" TEXT NOT NULL,
+    "senderId" INTEGER NOT NULL,
+    "receiverId" INTEGER NOT NULL,
     "chatId" TEXT,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
     CONSTRAINT "Message_pkey" PRIMARY KEY ("id")
 );
@@ -18,7 +24,7 @@ CREATE TABLE "Message" (
 -- CreateTable
 CREATE TABLE "Participant" (
     "id" INTEGER NOT NULL,
-    "chatId" TEXT,
+    "username" TEXT NOT NULL,
 
     CONSTRAINT "Participant_pkey" PRIMARY KEY ("id")
 );
@@ -32,10 +38,7 @@ CREATE TABLE "ParticpantsOnChats" (
 );
 
 -- AddForeignKey
-ALTER TABLE "Message" ADD CONSTRAINT "Message_chatId_fkey" FOREIGN KEY ("chatId") REFERENCES "Chat"("id") ON DELETE SET NULL ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "Participant" ADD CONSTRAINT "Participant_chatId_fkey" FOREIGN KEY ("chatId") REFERENCES "Chat"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+ALTER TABLE "Message" ADD CONSTRAINT "Message_chatId_fkey" FOREIGN KEY ("chatId") REFERENCES "Chat"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "ParticpantsOnChats" ADD CONSTRAINT "ParticpantsOnChats_chatId_fkey" FOREIGN KEY ("chatId") REFERENCES "Chat"("id") ON DELETE RESTRICT ON UPDATE CASCADE;

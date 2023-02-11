@@ -1,4 +1,9 @@
-import { Inject, Injectable, UnauthorizedException } from '@nestjs/common';
+import {
+  ConflictException,
+  Inject,
+  Injectable,
+  UnauthorizedException,
+} from '@nestjs/common';
 import * as Pusher from 'pusher';
 import { CreateChatRequestDto } from 'src/dtos/create-chat-request.dto';
 import { CreateMessageRequestDto } from 'src/dtos/create-message-request.dto';
@@ -14,13 +19,13 @@ export class ChatService {
   findAllChats(userId: number) {
     return this.prismaService.chat.findMany({
       where: {
-        participants: { some: { id: userId } },
+        participants: { some: { participantId: userId } },
         messagesCount: { gte: 0 },
       },
       select: {
         id: true,
         messagesCount: true,
-        participants: { select: { id: true, username: true } },
+        participants: { select: { participant: true } },
         messages: {
           take: 1,
           orderBy: { createdAt: 'desc' },
@@ -54,42 +59,71 @@ export class ChatService {
             updatedAt: true,
           },
         },
-        participants: { select: { id: true, username: true } },
+        participants: { select: { participant: true } },
       },
     });
-    if (!chat.participants.find((participant) => participant.id === userId))
+    if (!chat.participants.find(({ participant }) => participant.id === userId))
       throw new UnauthorizedException();
     return chat;
   }
 
   async createChat(data: CreateChatRequestDto) {
-    const chat = await this.prismaService.chat.create({
-      data: {
+    const chat = await this.prismaService.chat.findFirst({
+      where: {
         participants: {
-          connect: [{ id: data.participants[0] }, { id: data.participants[1] }],
+          every: {
+            OR: [
+              { participantId: data.participants[0] },
+              { participantId: data.participants[1] },
+            ],
+          },
         },
       },
     });
-    return chat;
+    if (chat) throw new ConflictException();
+    return await this.prismaService.chat.create({
+      data: {
+        participants: {
+          create: [
+            {
+              participant: {
+                connect: {
+                  id: data.participants[0],
+                },
+              },
+            },
+            {
+              participant: {
+                connect: {
+                  id: data.participants[1],
+                },
+              },
+            },
+          ],
+        },
+      },
+    });
   }
 
   async createMessage(data: CreateMessageRequestDto) {
     const chat = await this.prismaService.chat.findUnique({
       where: { id: data.chatId },
-      include: { participants: true },
+      include: { participants: { include: { participant: true } } },
     });
     if (
-      !chat.participants.find((participant) => participant.id === data.senderId)
+      !chat.participants.find(
+        ({ participant }) => participant.id === data.senderId,
+      )
     )
       throw new UnauthorizedException();
     const receiver = chat.participants.find(
-      (participant) => participant.id !== data.senderId,
+      ({ participant }) => participant.id !== data.senderId,
     );
     const message = await this.prismaService.message.create({
       data: {
         body: data.message,
         senderId: data.senderId,
-        receiverId: receiver.id,
+        receiverId: receiver.participantId,
         chatId: data.chatId,
       },
     });

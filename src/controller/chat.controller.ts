@@ -32,7 +32,7 @@ export class ChatController {
 
   @MessagePattern({ cmd: 'create-chat' })
   createChat(@Payload() data: { participants: number[] }) {
-    this.chatService.createChat({ participants: data.participants });
+    return this.chatService.createChat({ participants: data.participants });
   }
 
   @MessagePattern({ cmd: 'create-message' })

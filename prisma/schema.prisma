@@ -11,13 +11,12 @@ datasource db {
 }
 
 model Chat {
-  id                 String               @id @default(uuid())
-  participants       Participant[]
-  messagesCount      Int                  @default(0)
-  messages           Message[]
-  createdAt          DateTime             @default(now())
-  updatedAt          DateTime             @default(now())
-  ParticpantsOnChats ParticpantsOnChats[]
+  id            String               @id @default(uuid())
+  messagesCount Int                  @default(0)
+  messages      Message[]
+  createdAt     DateTime             @default(now())
+  updatedAt     DateTime             @default(now())
+  participants  ParticpantsOnChats[]
 }
 
 model Message {
@@ -32,11 +31,9 @@ model Message {
 }
 
 model Participant {
-  id                 Int                  @id
-  username           String
-  Chat               Chat?                @relation(fields: [chatId], references: [id])
-  chatId             String?
-  ParticpantsOnChats ParticpantsOnChats[]
+  id       Int                  @id
+  username String
+  chats    ParticpantsOnChats[]
 }
 
 model ParticpantsOnChats {
