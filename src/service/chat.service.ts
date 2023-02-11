@@ -20,7 +20,7 @@ export class ChatService {
     return this.prismaService.chat.findMany({
       where: {
         participants: { some: { participantId: userId } },
-        messagesCount: { gte: 0 },
+        messagesCount: { gt: 0 },
       },
       select: {
         id: true,
