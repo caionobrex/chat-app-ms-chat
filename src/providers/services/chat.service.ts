@@ -7,7 +7,7 @@ import {
 import * as Pusher from 'pusher';
 import { CreateChatRequestDto } from 'src/dtos/create-chat-request.dto';
 import { CreateMessageRequestDto } from 'src/dtos/create-message-request.dto';
-import { PrismaService } from 'src/prisma.service';
+import { PrismaService } from 'src/providers/services/prisma.service';
 
 @Injectable()
 export class ChatService {

@@ -1,7 +1,7 @@
 import { Controller } from '@nestjs/common';
 import { EventPattern, MessagePattern, Payload } from '@nestjs/microservices';
 import { CreateMessageRequestDto } from 'src/dtos/create-message-request.dto';
-import { ChatService } from 'src/service/chat.service';
+import { ChatService } from 'src/providers/services/chat.service';
 
 @Controller()
 export class ChatController {
