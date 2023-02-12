@@ -6,6 +6,7 @@ import {
 } from '@nestjs/common';
 import * as Pusher from 'pusher';
 import { CreateChatRequestDto } from 'src/dtos/create-chat-request.dto';
+import { CreateChatResponseDto } from 'src/dtos/create-chat-response.dto';
 import { CreateMessageRequestDto } from 'src/dtos/create-message-request.dto';
 import { PrismaService } from 'src/providers/services/prisma.service';
 
@@ -67,8 +68,8 @@ export class ChatService {
     return chat;
   }
 
-  async createChat(data: CreateChatRequestDto) {
-    const chat = await this.prismaService.chat.findFirst({
+  async createChat(data: CreateChatRequestDto): Promise<CreateChatResponseDto> {
+    let chat = await this.prismaService.chat.findFirst({
       where: {
         participants: {
           every: {
@@ -81,7 +82,7 @@ export class ChatService {
       },
     });
     if (chat) throw new ConflictException();
-    return await this.prismaService.chat.create({
+    chat = await this.prismaService.chat.create({
       data: {
         participants: {
           create: [
@@ -103,6 +104,10 @@ export class ChatService {
         },
       },
     });
+    return {
+      chat,
+      message: 'Success',
+    };
   }
 
   async createMessage(data: CreateMessageRequestDto) {

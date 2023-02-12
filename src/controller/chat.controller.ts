@@ -1,5 +1,6 @@
 import { Controller } from '@nestjs/common';
 import { EventPattern, MessagePattern, Payload } from '@nestjs/microservices';
+import { CreateChatResponseDto } from 'src/dtos/create-chat-response.dto';
 import { CreateMessageRequestDto } from 'src/dtos/create-message-request.dto';
 import { ChatService } from 'src/providers/services/chat.service';
 
@@ -31,8 +32,19 @@ export class ChatController {
   }
 
   @MessagePattern({ cmd: 'create-chat' })
-  createChat(@Payload() data: { participants: number[] }) {
-    return this.chatService.createChat({ participants: data.participants });
+  async createChat(
+    @Payload() data: { participants: number[] },
+  ): Promise<CreateChatResponseDto> {
+    try {
+      return await this.chatService.createChat({
+        participants: data.participants,
+      });
+    } catch (err) {
+      return {
+        chat: null,
+        message: err.message,
+      };
+    }
   }
 
   @MessagePattern({ cmd: 'create-message' })
