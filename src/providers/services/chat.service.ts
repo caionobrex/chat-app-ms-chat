@@ -1,10 +1,8 @@
 import {
   ConflictException,
-  Inject,
   Injectable,
   UnauthorizedException,
 } from '@nestjs/common';
-import * as Pusher from 'pusher';
 import { CreateChatRequestDto } from 'src/dtos/create-chat-request.dto';
 import { CreateChatResponseDto } from 'src/dtos/create-chat-response.dto';
 import { CreateMessageRequestDto } from 'src/dtos/create-message-request.dto';
@@ -12,10 +10,7 @@ import { PrismaService } from 'src/providers/services/prisma.service';
 
 @Injectable()
 export class ChatService {
-  constructor(
-    private readonly prismaService: PrismaService,
-    @Inject('PUSHER_SERVICE') private readonly pusher: Pusher,
-  ) {}
+  constructor(private readonly prismaService: PrismaService) {}
 
   findAllChats(userId: number) {
     return this.prismaService.chat.findMany({
@@ -136,7 +131,6 @@ export class ChatService {
       where: { id: chat.id },
       data: { updatedAt: new Date(), messagesCount: { increment: 1 } },
     });
-    this.pusher.trigger(data.chatId, 'message-created', message);
     return message;
   }
 
@@ -151,7 +145,6 @@ export class ChatService {
       where: { id: message.chatId },
       data: { updatedAt: new Date(), messagesCount: { decrement: 1 } },
     });
-    this.pusher.trigger(message.chat.id, 'message-deleted', message);
     return message;
   }
 

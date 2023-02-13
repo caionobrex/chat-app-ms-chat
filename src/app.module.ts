@@ -1,23 +1,13 @@
 import { Module } from '@nestjs/common';
 import { ChatController } from './controller/chat.controller';
 import { ChatService } from './providers/services/chat.service';
-import * as Pusher from 'pusher';
 import { PrismaService } from './providers/services/prisma.service';
-
-const pusher = new Pusher({
-  appId: process.env.PUSHER_APP_ID,
-  key: process.env.PUSHER_KEY,
-  secret: process.env.PUSHER_SECRET,
-  cluster: process.env.PUSHER_CLUSTER,
-  useTLS: true,
-});
+import { JwtModule } from '@nestjs/jwt';
+import { ChatGateway } from './providers/chat.gateway';
 
 @Module({
   controllers: [ChatController],
-  providers: [
-    ChatService,
-    PrismaService,
-    { provide: 'PUSHER_SERVICE', useValue: pusher },
-  ],
+  imports: [JwtModule.register({ secret: 'cat123' })],
+  providers: [ChatService, PrismaService, ChatGateway],
 })
 export class AppModule {}
