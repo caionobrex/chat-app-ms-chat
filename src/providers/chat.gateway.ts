@@ -27,7 +27,22 @@ export class ChatGateway {
     @MessageBody() data: { chatId: string },
     @ConnectedSocket() client: Socket,
   ): Promise<void> {
-    client.join(data.chatId);
+    try {
+      const token = client.handshake.headers.authorization;
+      const payload = this.jwtService.verify(token);
+      const chat = await this.chatService.findChatById(data.chatId, payload.id);
+      if (!chat) {
+        client.emit('joinChat', {
+          message: 'You can not join a chat you are not part of.',
+          statusCode: 401,
+        });
+      } else {
+        client.join(data.chatId);
+        client.emit('joinChat', { message: 'Success', statusCode: 200 });
+      }
+    } catch (err) {
+      client.emit('joinChat', { message: 'Internal error', statusCode: 500 });
+    }
   }
 
   @SubscribeMessage('createMessage')
